@@ -15,13 +15,15 @@
 <div id="contacts"></div>
 </div>
 <script id="demo-source" type='text/javascript' src='../../../node_modules/steal/steal.js' main="@empty">
-var can = require('can');
-require('can/map/attributes/attributes');
-require('can/model/model');
-require('can/util/fixture/fixture');
+var each = require('can-util/js/each/each');
+var $ = require('jquery');
+var attributes = require('can-map-attributes');
+var Map = require('can-map');
+var Model = require('can-model');
+var fixture = require('can-fixture');
 
 // simulate ajax response with fixtures
-can.fixture("/contacts.json", function(){
+fixture("/contacts.json", function(){
   return [{
     'id': 1,
     'name' : 'Justin Meyer',
@@ -49,7 +51,7 @@ can.fixture("/contacts.json", function(){
   }];
 })
 
-can.Model.convert.date = function(raw){
+Model.convert.date = function(raw){
   if(typeof raw == 'string'){
     var matches = raw.match(/(\d+)-(\d+)-(\d+)/);
       return new Date( +matches[1],
@@ -61,7 +63,7 @@ can.Model.convert.date = function(raw){
 };
 
 // A task model that has a date
-var Task = can.Model({
+var Task = Model({
   attributes : {
     due : 'date'
   }
@@ -73,7 +75,7 @@ var Task = can.Model({
 });
 
 // A contact model that has many tasks
-var Contact = can.Model({
+var Contact = Model({
   attributes : {
     birthday : 'date',
     tasks: Task
@@ -92,15 +94,15 @@ var Contact = can.Model({
 });
 
 // Get all contacts and put them on the page
-Contact.findAll({}).done(function(contacts){
+Contact.findAll({}).then(function(contacts){
   var contactsEl = can.$('#contacts');
 
-  can.each(contacts, function(contact){
-    var li = can.$('<li>')
+  each(contacts, function(contact){
+    var li = $('<li>')
       .html(contact.name + " "+ contact.ageThisYear())
       .appendTo(contactsEl);
 
-    var ul = can.$("<ul>");
+    var ul = $("<ul>");
     var tasks = contact.attr('tasks')
 
     if(tasks){

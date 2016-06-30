@@ -1,17 +1,14 @@
-var can = require('can/util/util');
-require('can/map/map');
-require('can/map/map_helpers');
-require('can/list/list');
+var can = require('can-util');
+var Map = require('can-map');
+require('can-map/map-helpers');
+require('can-list');
 
 //!steal-remove-start
 can.dev.warn("can/map/attributes is a deprecated plugin and will be removed in a future release. "+
 	"can/map/define provides the same functionality in a more complete API.");
 //!steal-remove-end
 
-can.each([
-	can.Map,
-	can.Model
-], function (clss) {
+function applyAttributes (clss) {
 
 	// in some cases model might not be defined quite yet.
 	if (clss === undefined) {
@@ -20,7 +17,7 @@ can.each([
 	var isObject = function (obj) {
 		return typeof obj === 'object' && obj !== null && obj;
 	};
-	can.extend(clss, {
+	can.assign(clss, {
 
 		attributes: {},
 
@@ -47,10 +44,10 @@ can.each([
 			},
 			'default': function (val, oldVal, error, type) {
 				// Convert can.Model types using .model and .models
-				if (can.Map.prototype.isPrototypeOf(type.prototype) && typeof type.model === 'function' && typeof type.models === 'function') {
+				if (Map.prototype.isPrototypeOf(type.prototype) && typeof type.model === 'function' && typeof type.models === 'function') {
 					return type[can.isArray(val) ? 'models' : 'model'](val);
 				}
-				if (can.Map.prototype.isPrototypeOf(type.prototype)) {
+				if (Map.prototype.isPrototypeOf(type.prototype)) {
 					if (can.isArray(val) && typeof type.List === 'function') {
 						return new type.List(val);
 					}
@@ -59,7 +56,7 @@ can.each([
 				if (typeof type === 'function') {
 					return type(val, oldVal);
 				}
-				var construct = can.getObject(type),
+				var construct = can.string.getObject(type),
 					context = window,
 					realType;
 				// if type has a . we need to look it up
@@ -67,7 +64,7 @@ can.each([
 					// get everything before the last .
 					realType = type.substring(0, type.lastIndexOf('.'));
 					// get the object before the last .
-					context = can.getObject(realType);
+					context = can.string.getObject(realType);
 				}
 				return typeof construct === 'function' ? construct.call(context, val, oldVal) : val;
 			}
@@ -105,17 +102,19 @@ can.each([
 			'serialize'
 		], function (name) {
 			if (superClass[name] !== self[name]) {
-				self[name] = can.extend({}, superClass[name], self[name]);
+				self[name] = can.deepAssign({}, superClass[name], self[name]);
 			}
 		});
 	};
-});
+}
+applyAttributes(Map);
+
 /**
  * @hide
  * @function can.Map.prototype.convert
  * @parent can.Map.attributes
  */
-can.Map.prototype.__convert = function (prop, value) {
+Map.prototype.__convert = function (prop, value) {
 	// check if there is a
 	var Class = this.constructor,
 		oldVal = this.__get(prop),
@@ -128,8 +127,8 @@ can.Map.prototype.__convert = function (prop, value) {
 	return value === null || !type ? value : converter.call(Class, value, oldVal, function () {}, type);
 };
 
-var oldSerialize = can.Map.prototype.___serialize;
-can.Map.prototype.___serialize = function(name, val){
+var oldSerialize = Map.prototype.___serialize;
+Map.prototype.___serialize = function(name, val){
 
 	var constructor = this.constructor,
 		type = constructor.attributes ? constructor.attributes[name] : 0,
@@ -146,8 +145,8 @@ can.Map.prototype.___serialize = function(name, val){
 		oldSerialize.apply(this, arguments);
 };
 // add support for single value serialize
-var mapSerialize = can.Map.prototype.serialize;
-can.Map.prototype.serialize = function (attrName) {
+var mapSerialize = Map.prototype.serialize;
+Map.prototype.serialize = function (attrName) {
 	var baseResult = mapSerialize.apply(this, arguments);
 	if(attrName){
 		return baseResult[attrName];
@@ -156,4 +155,4 @@ can.Map.prototype.serialize = function (attrName) {
 	}
 };
 
-module.exports = exports = can.Map;
+module.exports = exports = Map;
