@@ -1,0 +1,8 @@
+[
+{"can-map-attributes": [
+	"can-map-attributes.prototype.serialize",
+	"can-map-attributes.static.attributes",
+	"can-map-attributes.static.convert",
+	"can-map-attributes.static.serialize"
+]}
+]
