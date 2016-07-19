@@ -1,6 +1,6 @@
 {
   "name": "can-map-attributes",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Define Observe attributes",
   "homepage": "https://canjs.com",
   "author": {
@@ -19,6 +19,7 @@
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
     "build": "node build.js",
+    "document": "bit-docs",
     "develop": "can-serve --static --develop --port 8080"
   },
   "main": "dist/cjs/can-map-attributes",
@@ -60,6 +61,7 @@
     "jquery": "~2.2.1"
   },
   "devDependencies": {
+    "bit-docs": "0.0.6",
     "can-control": "^3.0.0-pre.5",
     "can-model": "^3.0.0-pre",
     "can-fixture": "^0.3.0",
@@ -69,9 +71,26 @@
     "steal": "^0.14.0",
     "steal-qunit": "^0.1.1",
     "steal-tools": "^0.14.0",
-    "testee": "^0.2.4",
-    "generator-donejs": "^0.7.0",
-    "donejs-cli": "^0.7.0",
-    "can-ssr": "^0.11.6"
+    "testee": "^0.2.4"
+  },
+  "bit-docs": {
+    "dependencies": {
+      "bit-docs-glob-finder": "^0.0.5",
+      "bit-docs-dev": "^0.0.3",
+      "bit-docs-js": "^0.0.3",
+      "bit-docs-generate-readme": "^0.0.8"
+    },
+    "glob": {
+      "pattern": "**/*.{js,md}",
+      "ignore": [
+        "**/node_modules/*",
+        "node_modules/**/*",
+        "**/*{-,_,}{test,qunit}{s,}.js"
+      ]
+    },
+    "readme": {
+      "apis": "./docs/apis.json"
+    },
+    "parent": "can-map-attributes"
   }
 }
