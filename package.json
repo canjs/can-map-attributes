@@ -61,7 +61,7 @@
   },
   "devDependencies": {
     "can-control": "^3.0.0-pre.5",
-    "can-model": "^2.3.11",
+    "can-model": "^3.0.0-pre",
     "can-fixture": "^0.3.0",
     "cssify": "^0.6.0",
     "documentjs": "^0.4.2",
@@ -69,7 +69,7 @@
     "steal": "^0.14.0",
     "steal-qunit": "^0.1.1",
     "steal-tools": "^0.14.0",
-    "testee": "^0.2.4"
+    "testee": "^0.2.4",
     "generator-donejs": "^0.7.0",
     "donejs-cli": "^0.7.0",
     "can-ssr": "^0.11.6"

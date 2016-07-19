@@ -251,7 +251,7 @@ test('attr() should respect convert functions for lists when updating', function
 				members: 'ListTest.User.models'
 			}
 		}, {})
-	}
+	};
 	
 	ListTest.User.List = can.Model.List('ListTest_User_List', {}, {});
 	
