@@ -673,14 +673,14 @@ test('Convert Model using .model and .models (#293)', 5, function () {
 });
 test('Maximum call stack size exceeded with global models (#476)', function () {
 	stop();
-	var Character = Model.extend({
+	var Game, Character = Model.extend({
 		attributes: {
 			game: function () {
 				return Game.model.apply(Game, arguments);
 			}
 		}
 	}, {});
-	var Game = window.Game = Model.extend({
+	Game = window.Game = Model.extend({
 		attributes: {
 			characters: function () {
 				return Character.models.apply(Character, arguments);
