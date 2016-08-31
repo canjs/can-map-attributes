@@ -1,12 +1,12 @@
 /*jshint undef:false,unused:false*/
 /* global Promise */
 /* global require */
-/* global window */
-/* global test, ok, equal, deepEqual */
+/* global window, setTimeout */
+/* global test, ok, equal, deepEqual, stop, start */
 var can = require("can-util");
 var Map = require("can-map");
-require('can-map-attributes');
 var Model = require('can-model');
+require('can-map-attributes');
 var fixture = require('can-fixture');
 var QUnit = require('steal-qunit');
 
@@ -182,7 +182,7 @@ test('defaults', function () {
 	equal(link.attr('rupees'), 255);
 });
 test('nested model attr', function () {
-	window.NestedAttrTest = {
+	var NestedAttrTest = window.NestedAttrTest = {
 		User: Model.extend('NestedAttrTest_User', {}, {}),
 		Task: Model.extend('NestedAttrTest_Task', {
 			attributes: {
@@ -239,21 +239,21 @@ test('nested model attr', function () {
 	equal(NestedAttrTest.User.store[17].id, 17, 'The model store should still have Michael associated by his id');
 });
 test('attr() should respect convert functions for lists when updating', function () {
-	window.ListTest = {
-		User: can.Model('ListTest_User', {}, {}),
-		Task: can.Model('ListTest_Task', {
+	var ListTest = window.ListTest = {
+		User: Model('ListTest_User', {}, {}),
+		Task: Model('ListTest_Task', {
 			attributes: {
 				project: 'ListTest.Project.model'
 			}
 		}, {}),
-		Project: can.Model('ListTest_Project', {
+		Project: Model('ListTest_Project', {
 			attributes: {
 				members: 'ListTest.User.models'
 			}
 		}, {})
 	};
 	
-	ListTest.User.List = can.Model.List('ListTest_User_List', {}, {});
+	ListTest.User.List = Model.List('ListTest_User_List', {}, {});
 	
 	var task = ListTest.Task.model({
 		id: 1,
@@ -305,16 +305,16 @@ test('plugin passes old value to converter', 2, function () {
 });
 test('attr does not blow away old observable when going from empty to having items (#160)', function () {
 	
-	window.EmptyListTest = {
-		User: can.Model('EmptyListTest_User', {}, {}),
-		Project: can.Model('EmptyListTest_Project', {
+	var EmptyListTest = window.EmptyListTest = {
+		User: Model('EmptyListTest_User', {}, {}),
+		Project: Model('EmptyListTest_Project', {
 			attributes: {
 				members: 'EmptyListTest.User.models'
 			}
 		}, {})
 	};
 	
-	EmptyListTest.User.List = can.Model.List('EmptyListTest_User_List', {}, {});
+	EmptyListTest.User.List = Model.List('EmptyListTest_User_List', {}, {});
 
 	var project = EmptyListTest.Project.model({
 		id: 789,
@@ -357,7 +357,7 @@ test('Default converters and boolean fix (#247)', function () {
 	ok(obs.attr('time') instanceof Date, 'Attribute is a date');
 });
 test('Nested converters called twice (#174)', function () {
-	OtherThing = can.Model({
+	window.OtherThing = Model({
 		attributes: {
 			score: 'capacity'
 		},
@@ -367,13 +367,13 @@ test('Nested converters called twice (#174)', function () {
 			}
 		}
 	}, {});
-	Thing = can.Model({
+	window.Thing = Model({
 		attributes: {
 			otherThing: 'OtherThing.model'
 		},
 		findOne: 'GET /things/{id}'
 	}, {});
-	var t = new Thing({
+	var t = new window.Thing({
 		'name': 'My Thing',
 		'otherThing': {
 			'score': 1
@@ -418,14 +418,14 @@ test('Nested converters called with merged data', function () {
 	ok(nested === obs.attr('nested'), 'same object');
 });
 test('Recursive attributes', function () {
-	var Player = can.Model({
+	var Player = Model({
 		attributes: {
 			team: 'Team.model'
 		},
 		findAll: 'GET /players',
 		destroy: 'DELETE /players/{id}'
 	}, {});
-	var Team = can.Model({
+	var Team = window.Team = Model({
 		attributes: {
 			players: 'Player.models'
 		},
@@ -516,7 +516,7 @@ test('Recursive attributes', function () {
 		.then(function (players) {
 			equal(players.length, 3, 'Players loaded');
 			return players[2].destroy();
-		}).then(function (g) {
+		}).then(function () {
 			return Player.findAll();
 		}).then(function (players) {
 			equal(players.length, 2, 'One player destroyed');
@@ -525,7 +525,7 @@ test('Recursive attributes', function () {
 });
 test('store instances (#457)', function () {
 	var Player;
-	var Game = can.Model.extend({
+	var Game = Model.extend({
 		attributes: {
 			players: 'players'
 		},
@@ -536,7 +536,7 @@ test('store instances (#457)', function () {
 		},
 		findOne: 'GET /games/{id}'
 	}, {});
-	Player = can.Model.extend({
+	Player = Model.extend({
 		attributes: {
 			games: 'games'
 		},
@@ -546,7 +546,7 @@ test('store instances (#457)', function () {
 			}
 		}
 	}, {});
-	can.Model._reqs++;
+	Model._reqs++;
 	var game = Game.model({
 		'id': '1',
 		'name': 'Fantasy Baseball',
@@ -572,7 +572,7 @@ test('store instances (#457)', function () {
 				});
 		});
 	equal(mismatchFound, false, 'Model instances match');
-	can.Model._reqs--;
+	Model._reqs--;
 });
 test('Converter functions', function () {
 	var Value = can.Map.extend({
@@ -624,8 +624,8 @@ test('Convert can.Map constructs passed as attributes (#293)', 4, function () {
 	equal(link.attr('levelsCompleted.0')
 		.getName(), 'Level: Aquamentus', 'Entry got converted as well');
 });
-test('Convert can.Model using .model and .models (#293)', 5, function () {
-	var Sword = can.Model.extend({
+test('Convert Model using .model and .models (#293)', 5, function () {
+	var Sword = Model.extend({
 		findAll: 'GET /swords',
 		model: function (data) {
 			data.test = 'Used .model';
@@ -636,16 +636,16 @@ test('Convert can.Model using .model and .models (#293)', 5, function () {
 			return this.attr('power') * 100;
 		}
 	});
-	var Level = can.Model.extend({
+	var Level = Model.extend({
 		findAll: 'GET /levels',
 		models: function (array) {
 			can.each(array, function (current, index) {
 				current.index = index;
 			});
-			return can.Model.models.call(this, array);
+			return Model.models.call(this, array);
 		}
 	}, {});
-	var Zelda = can.Model.extend({
+	var Zelda = Model.extend({
 		attributes: {
 			sword: Sword,
 			levelsCompleted: Level
@@ -673,14 +673,14 @@ test('Convert can.Model using .model and .models (#293)', 5, function () {
 });
 test('Maximum call stack size exceeded with global models (#476)', function () {
 	stop();
-	var Character = can.Model.extend({
+	var Character = Model.extend({
 		attributes: {
 			game: function () {
 				return Game.model.apply(Game, arguments);
 			}
 		}
 	}, {});
-	window.Game = can.Model.extend({
+	var Game = window.Game = Model.extend({
 		attributes: {
 			characters: function () {
 				return Character.models.apply(Character, arguments);
@@ -707,7 +707,7 @@ test('Maximum call stack size exceeded with global models (#476)', function () {
 			return dfd;
 		}
 	}, {});
-	window.Game.findOne({
+	Game.findOne({
 		id: 'LOZ'
 	})
 		.then(function (g) {
