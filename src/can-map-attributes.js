@@ -1,4 +1,4 @@
-var can = require('can-util');
+var can = require('can-util/namespace');
 var Map = require('can-map');
 require('can-map/map-helpers');
 require('can-list');
@@ -111,18 +111,9 @@ applyAttributes(Map);
 // Check to see if can-model has been loaded but not set up for attributes.
 //  If not loaded, don't try to import it.  If it gets loaded
 //  later, it will be properly set up with attributes.
-const modelCheckPromise = System.normalize('can-model').then((normalizedModel) => {
-	if(System.has(normalizedModel)) {
-		return System.import(normalizedModel).then((CanModel) => {
-			if(!CanModel.attributes) {
-				applyAttributes(CanModel);
-			}
-			return Map;
-		});
-	} else {
-		return Map;
-	}
-});
+if(typeof can.Model !== "undefined") {
+	applyAttributes(can.Model);
+}
 
 /**
  * @hide
@@ -170,4 +161,4 @@ Map.prototype.serialize = function (attrName) {
 	}
 };
 
-module.exports = exports = modelCheckPromise;
+module.exports = exports = Map;
