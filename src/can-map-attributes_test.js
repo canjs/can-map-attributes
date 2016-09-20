@@ -1,12 +1,18 @@
 /*jshint undef:false,unused:false*/
+/* global Promise */
+/* global require */
+/* global window, setTimeout */
+/* global test, ok, equal, deepEqual, stop, start */
+var can = require("can-util");
+var Map = require("can-map");
+var Model = require('can-model');
 require('can-map-attributes');
-require('can/model/model');
-require('can/util/fixture/fixture');
-require('steal-qunit');
+var fixture = require('can-fixture');
+var QUnit = require('steal-qunit');
 
 QUnit.module('can/map/attributes');
 test('literal converters and serializes', function () {
-	can.Map('Task1', {
+	var Task1 = Map.extend('Task1', {
 		attributes: {
 			createdAt: 'date'
 		},
@@ -31,7 +37,7 @@ test('literal converters and serializes', function () {
 			}
 		}
 	}, {});
-	can.Map('Task2', {
+	var Task2 = Map.extend('Task2', {
 		attributes: {
 			createdAt: 'date'
 		},
@@ -79,43 +85,47 @@ test('literal converters and serializes', function () {
 		.name, 'Task2', 'Task2 model default serialized');
 });
 var makeClasses = function () {
-	can.Map('AttrTest.Person', {
-		serialize: function () {
-			return 'My name is ' + this.name;
-		}
-	});
-	can.Map('AttrTest.Loan');
-	can.Map('AttrTest.Issue');
+	var AttrTest = {
+		Person:	Map.extend('AttrTest_Person', {
+			serialize: function () {
+				return 'My name is ' + this.name;
+			}
+		}),
+		Loan: Map.extend('AttrTest_Loan'),
+		Issue: Map.extend('AttrTest_Issue'),
+		Customer: Map.extend('AttrTest_Customer', {
+			attributes: {
+				person: 'AttrTest.Person.model',
+				loans: 'AttrTest.Loan.models',
+				issues: 'AttrTest.Issue.models'
+			}
+		}, {})
+	};
 	AttrTest.Person.model = function (data) {
 		return new this(data);
 	};
 	AttrTest.Loan.models = function (data) {
-		return can.map(data, function (l) {
+		return data.map(function (l) {
 			return new AttrTest.Loan(l);
 		});
 	};
 	AttrTest.Issue.models = function (data) {
-		return can.map(data, function (l) {
+		return data.map(function (l) {
 			return new AttrTest.Issue(l);
 		});
 	};
-	can.Map('AttrTest.Customer', {
-		attributes: {
-			person: 'AttrTest.Person.model',
-			loans: 'AttrTest.Loan.models',
-			issues: 'AttrTest.Issue.models'
-		}
-	}, {});
+	return AttrTest;
 };
 test('default converters', function () {
 	var num = 1318541064012;
-	equal(can.Map.convert.date(num)
+	equal(Map.convert.date(num)
 		.getTime(), num, 'converted to a date with a number');
 	var str = 'Dec 25, 1995';
-	ok(can.Map.convert.date(str) instanceof Date, 'converted to a date with a string');
+	ok(Map.convert.date(str) instanceof Date, 'converted to a date with a string');
 });
 test('basic observe associations', function () {
-	makeClasses();
+	var AttrTest = makeClasses();
+	window.AttrTest = AttrTest;
 	var c = new AttrTest.Customer({
 		person: {
 			id: 1,
@@ -137,7 +147,7 @@ test('basic observe associations', function () {
 	equal(c.loans[0].constructor, AttrTest.Loan);
 });
 test('single seralize w/ attr name', function () {
-	var Breakfast = can.Map({
+	var Breakfast = Map({
 		attributes: {
 			time: 'date',
 			name: 'default'
@@ -172,17 +182,19 @@ test('defaults', function () {
 	equal(link.attr('rupees'), 255);
 });
 test('nested model attr', function () {
-	can.Model('NestedAttrTest.User', {}, {});
-	can.Model('NestedAttrTest.Task', {
-		attributes: {
-			owner: 'NestedAttrTest.User.model'
-		}
-	}, {});
-	can.Model('NestedAttrTest.Project', {
-		attributes: {
-			creator: 'NestedAttrTest.User.model'
-		}
-	}, {});
+	var NestedAttrTest = window.NestedAttrTest = {
+		User: Model.extend('NestedAttrTest_User', {}, {}),
+		Task: Model.extend('NestedAttrTest_Task', {
+			attributes: {
+				owner: 'NestedAttrTest.User.model'
+			}
+		}, {}),
+		Project: Model.extend('NestedAttrTest_Project', {
+			attributes: {
+				creator: 'NestedAttrTest.User.model'
+			}
+		}, {})
+	};
 	var michael = NestedAttrTest.User.model({
 		id: 17,
 		name: 'Michael'
@@ -227,18 +239,22 @@ test('nested model attr', function () {
 	equal(NestedAttrTest.User.store[17].id, 17, 'The model store should still have Michael associated by his id');
 });
 test('attr() should respect convert functions for lists when updating', function () {
-	can.Model('ListTest.User', {}, {});
-	can.Model.List('ListTest.User.List', {}, {});
-	can.Model('ListTest.Task', {
-		attributes: {
-			project: 'ListTest.Project.model'
-		}
-	}, {});
-	can.Model('ListTest.Project', {
-		attributes: {
-			members: 'ListTest.User.models'
-		}
-	}, {});
+	var ListTest = window.ListTest = {
+		User: Model('ListTest_User', {}, {}),
+		Task: Model('ListTest_Task', {
+			attributes: {
+				project: 'ListTest.Project.model'
+			}
+		}, {}),
+		Project: Model('ListTest_Project', {
+			attributes: {
+				members: 'ListTest.User.models'
+			}
+		}, {})
+	};
+	
+	ListTest.User.List = Model.List('ListTest_User_List', {}, {});
+	
 	var task = ListTest.Task.model({
 		id: 1,
 		name: 'Do it!',
@@ -268,7 +284,7 @@ test('attr() should respect convert functions for lists when updating', function
 	equal(task.project.members[1] instanceof ListTest.User, true, 'The user was converted to a model object');
 });
 test('plugin passes old value to converter', 2, function () {
-	var Ob = can.Map('AttrOldVal', {
+	var Ob = window.AttrOldVal = can.Map('AttrOldVal', {
 		oldVal: function (val, oldVal) {
 			if (val === 'first') {
 				ok(!oldVal, 'First time does not have an old value');
@@ -288,13 +304,18 @@ test('plugin passes old value to converter', 2, function () {
 	o.attr('test', 'second');
 });
 test('attr does not blow away old observable when going from empty to having items (#160)', function () {
-	can.Model('EmptyListTest.User', {}, {});
-	can.Model.List('EmptyListTest.User.List', {}, {});
-	can.Model('EmptyListTest.Project', {
-		attributes: {
-			members: 'EmptyListTest.User.models'
-		}
-	}, {});
+	
+	var EmptyListTest = window.EmptyListTest = {
+		User: Model('EmptyListTest_User', {}, {}),
+		Project: Model('EmptyListTest_Project', {
+			attributes: {
+				members: 'EmptyListTest.User.models'
+			}
+		}, {})
+	};
+	
+	EmptyListTest.User.List = Model.List('EmptyListTest_User_List', {}, {});
+
 	var project = EmptyListTest.Project.model({
 		id: 789,
 		members: []
@@ -336,7 +357,7 @@ test('Default converters and boolean fix (#247)', function () {
 	ok(obs.attr('time') instanceof Date, 'Attribute is a date');
 });
 test('Nested converters called twice (#174)', function () {
-	OtherThing = can.Model({
+	window.OtherThing = Model({
 		attributes: {
 			score: 'capacity'
 		},
@@ -346,13 +367,13 @@ test('Nested converters called twice (#174)', function () {
 			}
 		}
 	}, {});
-	Thing = can.Model({
+	window.Thing = Model({
 		attributes: {
 			otherThing: 'OtherThing.model'
 		},
 		findOne: 'GET /things/{id}'
 	}, {});
-	var t = new Thing({
+	var t = new window.Thing({
 		'name': 'My Thing',
 		'otherThing': {
 			'score': 1
@@ -397,14 +418,14 @@ test('Nested converters called with merged data', function () {
 	ok(nested === obs.attr('nested'), 'same object');
 });
 test('Recursive attributes', function () {
-	var Player = can.Model({
+	var Player = Model({
 		attributes: {
 			team: 'Team.model'
 		},
 		findAll: 'GET /players',
 		destroy: 'DELETE /players/{id}'
 	}, {});
-	var Team = can.Model({
+	var Team = window.Team = Model({
 		attributes: {
 			players: 'Player.models'
 		},
@@ -475,10 +496,10 @@ test('Recursive attributes', function () {
 			}]
 		}
 	}];
-	can.fixture('GET /players', function () {
+	fixture('GET /players', function () {
 		return PLAYERS;
 	});
-	can.fixture('DELETE /players/{id}', function (req) {
+	fixture('DELETE /players/{id}', function (req) {
 		var id = req && req.data && req.data.id;
 		if (id !== undefined) {
 			for (var i = 0, player; player = PLAYERS[i]; i++) {
@@ -491,22 +512,20 @@ test('Recursive attributes', function () {
 		return false;
 	});
 	stop();
-	can.when(Player.findAll())
+	Player.findAll()
 		.then(function (players) {
 			equal(players.length, 3, 'Players loaded');
-			can.when(players[2].destroy())
-				.then(function (g) {
-					can.when(Player.findAll())
-						.then(function (players) {
-							equal(players.length, 2, 'One player destroyed');
-							start();
-						});
-				});
-		});
+			return players[2].destroy();
+		}).then(function () {
+			return Player.findAll();
+		}).then(function (players) {
+			equal(players.length, 2, 'One player destroyed');
+			start();
+		}, start);
 });
 test('store instances (#457)', function () {
 	var Player;
-	var Game = can.Model.extend({
+	var Game = Model.extend({
 		attributes: {
 			players: 'players'
 		},
@@ -517,7 +536,7 @@ test('store instances (#457)', function () {
 		},
 		findOne: 'GET /games/{id}'
 	}, {});
-	Player = can.Model.extend({
+	Player = Model.extend({
 		attributes: {
 			games: 'games'
 		},
@@ -527,7 +546,7 @@ test('store instances (#457)', function () {
 			}
 		}
 	}, {});
-	can.Model._reqs++;
+	Model._reqs++;
 	var game = Game.model({
 		'id': '1',
 		'name': 'Fantasy Baseball',
@@ -553,7 +572,7 @@ test('store instances (#457)', function () {
 				});
 		});
 	equal(mismatchFound, false, 'Model instances match');
-	can.Model._reqs--;
+	Model._reqs--;
 });
 test('Converter functions', function () {
 	var Value = can.Map.extend({
@@ -605,8 +624,8 @@ test('Convert can.Map constructs passed as attributes (#293)', 4, function () {
 	equal(link.attr('levelsCompleted.0')
 		.getName(), 'Level: Aquamentus', 'Entry got converted as well');
 });
-test('Convert can.Model using .model and .models (#293)', 5, function () {
-	var Sword = can.Model.extend({
+test('Convert Model using .model and .models (#293)', 5, function () {
+	var Sword = Model.extend({
 		findAll: 'GET /swords',
 		model: function (data) {
 			data.test = 'Used .model';
@@ -617,16 +636,16 @@ test('Convert can.Model using .model and .models (#293)', 5, function () {
 			return this.attr('power') * 100;
 		}
 	});
-	var Level = can.Model.extend({
+	var Level = Model.extend({
 		findAll: 'GET /levels',
 		models: function (array) {
 			can.each(array, function (current, index) {
 				current.index = index;
 			});
-			return can.Model.models.call(this, array);
+			return Model.models.call(this, array);
 		}
 	}, {});
-	var Zelda = can.Model.extend({
+	var Zelda = Model.extend({
 		attributes: {
 			sword: Sword,
 			levelsCompleted: Level
@@ -654,23 +673,26 @@ test('Convert can.Model using .model and .models (#293)', 5, function () {
 });
 test('Maximum call stack size exceeded with global models (#476)', function () {
 	stop();
-	var Character = can.Model.extend({
+	var Game, Character = Model.extend({
 		attributes: {
 			game: function () {
 				return Game.model.apply(Game, arguments);
 			}
 		}
 	}, {});
-	window.Game = can.Model.extend({
+	Game = window.Game = Model.extend({
 		attributes: {
 			characters: function () {
 				return Character.models.apply(Character, arguments);
 			}
 		},
 		findOne: function () {
-			var dfd = can.Deferred();
+			var resolve;
+			var dfd = new Promise(function(res) {
+				resolve = res;
+			});
 			setTimeout(function () {
-				dfd.resolve({
+				resolve({
 					'id': 'LOZ',
 					'name': 'The Legend of Zelda',
 					'characters': [{
@@ -685,7 +707,7 @@ test('Maximum call stack size exceeded with global models (#476)', function () {
 			return dfd;
 		}
 	}, {});
-	window.Game.findOne({
+	Game.findOne({
 		id: 'LOZ'
 	})
 		.then(function (g) {

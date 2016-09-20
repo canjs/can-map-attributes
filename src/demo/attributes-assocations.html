@@ -94,7 +94,7 @@ var Contact = Model({
 });
 
 // Get all contacts and put them on the page
-Contact.findAll({}).done(function(contacts){
+Contact.findAll({}).then(function(contacts){
   var contactsEl = $('#contacts');
 
   each(contacts, function(contact){
