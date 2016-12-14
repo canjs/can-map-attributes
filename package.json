@@ -45,22 +45,22 @@
     "npmAlgorithm": "flat"
   },
   "dependencies": {
-    "can-list": "^3.0.0-pre.5",
-    "can-map": "^3.0.0-pre.8",
-    "can-util": "^3.0.0-pre.28",
-    "jquery": "~2.2.1"
+    "can-list": "^3.0.1",
+    "can-map": "^3.0.3",
+    "can-util": "^3.0.13",
+    "jquery": "2.x - 3.x"
   },
   "devDependencies": {
-    "bit-docs": "0.0.6",
-    "can-control": "^3.0.0-pre.5",
-    "can-model": "^3.0.0-pre",
-    "can-fixture": "^0.3.0",
+    "bit-docs": "0.0.7",
+    "can-control": "^3.0.4",
+    "can-model": "^3.0.0-pre.1",
+    "can-fixture": "^1.0.10",
     "documentjs": "^0.4.2",
     "jshint": "^2.9.1",
-    "steal": "^0.14.0",
+    "steal": "^0.16.43",
     "steal-qunit": "^0.1.1",
-    "steal-tools": "^0.14.0",
-    "testee": "^0.2.4"
+    "steal-tools": "^0.16.8",
+    "testee": "^0.3.0"
   },
   "bit-docs": {
     "dependencies": {
