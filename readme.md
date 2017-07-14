@@ -1,8 +1,12 @@
+# DANGER: No Longer Maintained
+
+*The `can-map-attributes` plugin is no longer under active or passive development. Please use the [can.Map.prototype.define](https://canjs.com/docs/can.Map.prototype.define.html) plugin, which provides the same functionality. In particular, projects using converters or serializers should consider switching to [can.Map.prototype.define.type define's type](https://canjs.com/docs/can.Map.prototype.define.type.html) and [can.Map.prototype.define.serialize define's serialize](https://canjs.com/docs/can.Map.prototype.serialize.html).*
+
+---
+
 # can-map-attributes (DEPRECATED)
 
-*The attributes plugin has been deprecated in favor of the new [can.Map.prototype.define](https://canjs.com/docs/can.Map.prototype.define.html) plugin, which provides the same functionality. It will still be maintained up to 3.0 and potentially after. Projects using converters or serializers should consider switching to [can.Map.prototype.define.type define's type](https://canjs.com/docs/can.Map.prototype.define.type.html) and [can.Map.prototype.define.serialize define's serialize](https://canjs.com/docs/can.Map.prototype.serialize.html).*
-
-[![Build Status](https://travis-ci.org/canjs/can-map-attributes.png?branch=master)](https://travis-ci.org/canjs/can-map-attributes)
+[![Build Status](https://travis-ci.org/canjs/can-map-attributes.svg?branch=master)](https://travis-ci.org/canjs/can-map-attributes)
 
 Define Observe attributes
 
