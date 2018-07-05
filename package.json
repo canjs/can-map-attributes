@@ -45,7 +45,7 @@
     "npmAlgorithm": "flat"
   },
   "dependencies": {
-    "can-list": "^3.0.1",
+    "can-list": "^4.1.0",
     "can-map": "^3.0.3",
     "can-util": "^3.0.13",
     "jquery": "2.x - 3.x"
