@@ -11,7 +11,7 @@ var fixture = require('can-fixture');
 var QUnit = require('steal-qunit');
 
 QUnit.module('can/map/attributes');
-test('literal converters and serializes', function () {
+QUnit.test('literal converters and serializes', function(assert) {
 	var Task1 = Map.extend('Task1', {
 		attributes: {
 			createdAt: 'date'
@@ -73,15 +73,15 @@ test('literal converters and serializes', function () {
 		createdAt: d,
 		name: 'Task2'
 	});
-	equal(task1.createdAt, 'feb', 'Task1 model convert');
-	equal(task2.createdAt, 'jun', 'Task2 model convert');
-	equal(task1.serialize()
+	assert.equal(task1.createdAt, 'feb', 'Task1 model convert');
+	assert.equal(task2.createdAt, 'jun', 'Task2 model convert');
+	assert.equal(task1.serialize()
 		.createdAt, 1, 'Task1 model serialize');
-	equal(task2.serialize()
+	assert.equal(task2.serialize()
 		.createdAt, 2, 'Task2 model serialize');
-	equal(task1.serialize()
+	assert.equal(task1.serialize()
 		.name, 'Task1', 'Task1 model default serialized');
-	equal(task2.serialize()
+	assert.equal(task2.serialize()
 		.name, 'Task2', 'Task2 model default serialized');
 });
 var makeClasses = function () {
@@ -116,14 +116,14 @@ var makeClasses = function () {
 	};
 	return AttrTest;
 };
-test('default converters', function () {
+QUnit.test('default converters', function(assert) {
 	var num = 1318541064012;
-	equal(Map.convert.date(num)
+	assert.equal(Map.convert.date(num)
 		.getTime(), num, 'converted to a date with a number');
 	var str = 'Dec 25, 1995';
-	ok(Map.convert.date(str) instanceof Date, 'converted to a date with a string');
+	assert.ok(Map.convert.date(str) instanceof Date, 'converted to a date with a string');
 });
-test('basic observe associations', function () {
+QUnit.test('basic observe associations', function(assert) {
 	var AttrTest = makeClasses();
 	window.AttrTest = AttrTest;
 	var c = new AttrTest.Customer({
@@ -140,13 +140,13 @@ test('basic observe associations', function () {
 			id: 3
 		}]
 	});
-	equal(c.person.name, 'Justin', 'association present');
-	equal(c.person.constructor, AttrTest.Person, 'belongs to association typed');
-	equal(c.issues.length, 0);
-	equal(c.loans.length, 2);
-	equal(c.loans[0].constructor, AttrTest.Loan);
+	assert.equal(c.person.name, 'Justin', 'association present');
+	assert.equal(c.person.constructor, AttrTest.Person, 'belongs to association typed');
+	assert.equal(c.issues.length, 0);
+	assert.equal(c.loans.length, 2);
+	assert.equal(c.loans[0].constructor, AttrTest.Loan);
 });
-test('single seralize w/ attr name', function () {
+QUnit.test('single seralize w/ attr name', function(assert) {
 	var Breakfast = Map({
 		attributes: {
 			time: 'date',
@@ -163,10 +163,10 @@ test('single seralize w/ attr name', function () {
 		time: time,
 		name: 'eggs'
 	});
-	equal(b.serialize('time'), time.getTime());
-	ok(b.serialize());
+	assert.equal(b.serialize('time'), time.getTime());
+	assert.ok(b.serialize());
 });
-test('defaults', function () {
+QUnit.test('defaults', function(assert) {
 	var Zelda = can.Map({
 		defaults: {
 			sword: 'Wooden Sword',
@@ -178,10 +178,10 @@ test('defaults', function () {
 	var link = new Zelda({
 		rupees: 255
 	});
-	equal(link.attr('sword'), 'Wooden Sword');
-	equal(link.attr('rupees'), 255);
+	assert.equal(link.attr('sword'), 'Wooden Sword');
+	assert.equal(link.attr('rupees'), 255);
 });
-test('nested model attr', function () {
+QUnit.test('nested model attr', function(assert) {
 	var NestedAttrTest = window.NestedAttrTest = {
 		User: Model.extend('NestedAttrTest_User', {}, {}),
 		Task: Model.extend('NestedAttrTest_Task', {
@@ -221,8 +221,8 @@ test('nested model attr', function () {
 	});
 	task.bind('foo', function () {});
 	project.bind('foo', function () {});
-	equal(task.attr('owner.name'), 'Michael', 'owner hash correctly modeled');
-	equal(project.attr('creator.name'), 'Michael', 'creator hash correctly modeled');
+	assert.equal(task.attr('owner.name'), 'Michael', 'owner hash correctly modeled');
+	assert.equal(project.attr('creator.name'), 'Michael', 'creator hash correctly modeled');
 
 	task.attr({
 		owner: {
@@ -230,15 +230,15 @@ test('nested model attr', function () {
 			name: 'Amy'
 		}
 	});
-	equal(task.attr('owner.name'), 'Amy', 'Task correctly updated to Amy user model');
-	equal(task.attr('owner.id'), 29, 'Task correctly updated to Amy user model');
+	assert.equal(task.attr('owner.name'), 'Amy', 'Task correctly updated to Amy user model');
+	assert.equal(task.attr('owner.id'), 29, 'Task correctly updated to Amy user model');
 
-	equal(project.attr('creator.name'), 'Michael', 'Project creator should still be Michael');
+	assert.equal(project.attr('creator.name'), 'Michael', 'Project creator should still be Michael');
 
-	equal(project.attr('creator.id'), 17, 'Project creator should still be Michael');
-	equal(NestedAttrTest.User.store[17].id, 17, 'The model store should still have Michael associated by his id');
+	assert.equal(project.attr('creator.id'), 17, 'Project creator should still be Michael');
+	assert.equal(NestedAttrTest.User.store[17].id, 17, 'The model store should still have Michael associated by his id');
 });
-test('attr() should respect convert functions for lists when updating', function () {
+QUnit.test('attr() should respect convert functions for lists when updating', function(assert) {
 	var ListTest = window.ListTest = {
 		User: Model('ListTest_User', {}, {}),
 		Task: Model('ListTest_Task', {
@@ -264,7 +264,7 @@ test('attr() should respect convert functions for lists when updating', function
 			members: []
 		}
 	});
-	equal(task.project.members instanceof ListTest.User.List, true, 'the list is a User List');
+	assert.equal(task.project.members instanceof ListTest.User.List, true, 'the list is a User List');
 	task.attr({
 		id: 1,
 		project: {
@@ -278,19 +278,19 @@ test('attr() should respect convert functions for lists when updating', function
 			}]
 		}
 	});
-	equal(task.project.members instanceof ListTest.User.List, true, 'the list is a User List');
-	equal(task.project.members.length, 2, 'The members were added');
-	equal(task.project.members[0] instanceof ListTest.User, true, 'The members was converted to a model object');
-	equal(task.project.members[1] instanceof ListTest.User, true, 'The user was converted to a model object');
+	assert.equal(task.project.members instanceof ListTest.User.List, true, 'the list is a User List');
+	assert.equal(task.project.members.length, 2, 'The members were added');
+	assert.equal(task.project.members[0] instanceof ListTest.User, true, 'The members was converted to a model object');
+	assert.equal(task.project.members[1] instanceof ListTest.User, true, 'The user was converted to a model object');
 });
-test('plugin passes old value to converter', 2, function () {
+QUnit.test('plugin passes old value to converter', 2, function(assert) {
 	var Ob = window.AttrOldVal = can.Map('AttrOldVal', {
 		oldVal: function (val, oldVal) {
 			if (val === 'first') {
-				ok(!oldVal, 'First time does not have an old value');
+				assert.ok(!oldVal, 'First time does not have an old value');
 			}
 			if (val === 'second') {
-				equal(oldVal, 'first', 'Old value is correct');
+				assert.equal(oldVal, 'first', 'Old value is correct');
 			}
 			return val;
 		},
@@ -303,7 +303,7 @@ test('plugin passes old value to converter', 2, function () {
 	});
 	o.attr('test', 'second');
 });
-test('attr does not blow away old observable when going from empty to having items (#160)', function () {
+QUnit.test('attr does not blow away old observable when going from empty to having items (#160)', function(assert) {
 	
 	var EmptyListTest = window.EmptyListTest = {
 		User: Model('EmptyListTest_User', {}, {}),
@@ -328,12 +328,12 @@ test('attr does not blow away old observable when going from empty to having ite
 			name: 'bob'
 		}]
 	});
-	deepEqual(project.attr('members')
+	assert.deepEqual(project.attr('members')
 		._cid, oldCid, 'should be the same observe, so that views bound to the old one get updates');
-	equal(project.attr('members')
+	assert.equal(project.attr('members')
 		.length, 1, 'list should have bob in it');
 });
-test('Default converters and boolean fix (#247)', function () {
+QUnit.test('Default converters and boolean fix (#247)', function(assert) {
 	var MyObserve = can.Map({
 		attributes: {
 			enabled: 'boolean',
@@ -346,17 +346,17 @@ test('Default converters and boolean fix (#247)', function () {
 			time: 1358980553275,
 			age: '26'
 		});
-	deepEqual(obs.attr('enabled'), false, 'Attribute got converted to boolean false');
+	assert.deepEqual(obs.attr('enabled'), false, 'Attribute got converted to boolean false');
 	obs.attr('enabled', 'true');
-	deepEqual(obs.attr('enabled'), true, 'Attribute got converted to boolean true');
+	assert.deepEqual(obs.attr('enabled'), true, 'Attribute got converted to boolean true');
 	obs.attr('enabled', '0');
-	deepEqual(obs.attr('enabled'), false, 'Attribute got converted to boolean false');
+	assert.deepEqual(obs.attr('enabled'), false, 'Attribute got converted to boolean false');
 	obs.attr('enabled', '1');
-	deepEqual(obs.attr('enabled'), true, 'Attribute got converted to boolean true');
-	deepEqual(obs.attr('age'), 26, 'Age converted from string to number');
-	ok(obs.attr('time') instanceof Date, 'Attribute is a date');
+	assert.deepEqual(obs.attr('enabled'), true, 'Attribute got converted to boolean true');
+	assert.deepEqual(obs.attr('age'), 26, 'Age converted from string to number');
+	assert.ok(obs.attr('time') instanceof Date, 'Attribute is a date');
 });
-test('Nested converters called twice (#174)', function () {
+QUnit.test('Nested converters called twice (#174)', function(assert) {
 	window.OtherThing = Model({
 		attributes: {
 			score: 'capacity'
@@ -386,10 +386,10 @@ test('Nested converters called twice (#174)', function () {
 		},
 		'id': 'ALLCACHES'
 	});
-	equal(t.attr('otherThing.score'), 20, 'converter called correctly');
+	assert.equal(t.attr('otherThing.score'), 20, 'converter called correctly');
 });
 // tests that the workaround listed in #208 works with the correct call signature and data
-test('Nested converters called with merged data', function () {
+QUnit.test('Nested converters called with merged data', function(assert) {
 	var MyObserve = can.Map({
 		attributes: {
 			nested: 'nested'
@@ -415,9 +415,9 @@ test('Nested converters called with merged data', function () {
 			count: 2
 		}
 	});
-	ok(nested === obs.attr('nested'), 'same object');
+	assert.ok(nested === obs.attr('nested'), 'same object');
 });
-test('Recursive attributes', function () {
+QUnit.test('Recursive attributes', function(assert) {
 	var Player = Model({
 		attributes: {
 			team: 'Team.model'
@@ -511,19 +511,19 @@ test('Recursive attributes', function () {
 		}
 		return false;
 	});
-	stop();
+	var done = assert.async();
 	Player.findAll()
 		.then(function (players) {
-			equal(players.length, 3, 'Players loaded');
+			assert.equal(players.length, 3, 'Players loaded');
 			return players[2].destroy();
 		}).then(function () {
 			return Player.findAll();
 		}).then(function (players) {
-			equal(players.length, 2, 'One player destroyed');
-			start();
+			assert.equal(players.length, 2, 'One player destroyed');
+			done();
 		}, start);
 });
-test('store instances (#457)', function () {
+QUnit.test('store instances (#457)', function(assert) {
 	var Player;
 	var Game = Model.extend({
 		attributes: {
@@ -571,10 +571,10 @@ test('store instances (#457)', function () {
 					}
 				});
 		});
-	equal(mismatchFound, false, 'Model instances match');
+	assert.equal(mismatchFound, false, 'Model instances match');
 	Model._reqs--;
 });
-test('Converter functions', function () {
+QUnit.test('Converter functions', function(assert) {
 	var Value = can.Map.extend({
 		attributes: {
 			value: function (orig) {
@@ -585,9 +585,9 @@ test('Converter functions', function () {
 	var testValue = new Value({
 		value: 0.823
 	});
-	equal(testValue.attr('value'), 82.3, 'Value got multiplied');
+	assert.equal(testValue.attr('value'), 82.3, 'Value got multiplied');
 });
-test('Convert can.Map constructs passed as attributes (#293)', 4, function () {
+QUnit.test('Convert can.Map constructs passed as attributes (#293)', 4, function(assert) {
 	var Sword = can.Map.extend({
 		getPower: function () {
 			return this.attr('power') * 100;
@@ -617,14 +617,14 @@ test('Convert can.Map constructs passed as attributes (#293)', 4, function () {
 			name: 'Dodongo'
 		}]
 	});
-	ok(link.attr('sword') instanceof Sword, 'Sword got converted');
-	equal(link.attr('sword')
+	assert.ok(link.attr('sword') instanceof Sword, 'Sword got converted');
+	assert.equal(link.attr('sword')
 		.getPower(), 20, 'Got sword power!');
-	ok(link.attr('levelsCompleted') instanceof Level.List, 'Got a level list');
-	equal(link.attr('levelsCompleted.0')
+	assert.ok(link.attr('levelsCompleted') instanceof Level.List, 'Got a level list');
+	assert.equal(link.attr('levelsCompleted.0')
 		.getName(), 'Level: Aquamentus', 'Entry got converted as well');
 });
-test('Convert Model using .model and .models (#293)', 5, function () {
+QUnit.test('Convert Model using .model and .models (#293)', 5, function(assert) {
 	var Sword = Model.extend({
 		findAll: 'GET /swords',
 		model: function (data) {
@@ -664,15 +664,15 @@ test('Convert Model using .model and .models (#293)', 5, function () {
 			name: 'Dodongo'
 		}]
 	});
-	ok(link.attr('sword') instanceof Sword, 'Sword got converted');
-	equal(link.attr('sword')
+	assert.ok(link.attr('sword') instanceof Sword, 'Sword got converted');
+	assert.equal(link.attr('sword')
 		.getPower(), 20, 'Got sword power!');
-	equal(link.attr('sword.test'), 'Used .model', 'Data ran through Sword.model');
-	ok(link.attr('levelsCompleted') instanceof Level.List, 'Got a level list');
-	equal(link.attr('levelsCompleted.1.index'), 1, 'Data ran through Level.models');
+	assert.equal(link.attr('sword.test'), 'Used .model', 'Data ran through Sword.model');
+	assert.ok(link.attr('levelsCompleted') instanceof Level.List, 'Got a level list');
+	assert.equal(link.attr('levelsCompleted.1.index'), 1, 'Data ran through Level.models');
 });
-test('Maximum call stack size exceeded with global models (#476)', function () {
-	stop();
+QUnit.test('Maximum call stack size exceeded with global models (#476)', function(assert) {
+	var done = assert.async();
 	var Game, Character = Model.extend({
 		attributes: {
 			game: function () {
@@ -711,7 +711,7 @@ test('Maximum call stack size exceeded with global models (#476)', function () {
 		id: 'LOZ'
 	})
 		.then(function (g) {
-			ok(g.serialize(), 'No error serializing the object');
-			start();
+			assert.ok(g.serialize(), 'No error serializing the object');
+			done();
 		});
 });
